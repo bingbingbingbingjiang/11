@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>学生考勤系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .view {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .login-view, .register-view {
+            padding: 40px 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #4a90d9;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-btn.active {
+            border-color: #4a90d9;
+            background-color: #e8f0fe;
+            color: #4a90d9;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a90d9, #6bb3f4);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-approve {
+            background: #52c41a;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        .btn-reject {
+            background: #ff4d4f;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        .btn-grey {
+            background: #f5f5f5;
+            color: #999;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4a90d9;
+            cursor: pointer;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a90d9, #6bb3f4);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header .user-info {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 5px 15px;
+        }
+
+        .nav-item.active {
+            color: #4a90d9;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .checkin-btn {
+            width: 100%;
+            padding: 30px;
+            background: linear-gradient(135deg, #4a90d9, #6bb3f4);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .checkin-btn:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+
+        .checkin-btn.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .checkin-status {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .status-success {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+        }
+
+        .status-late {
+            background: #fff7e6;
+            border: 1px solid #ffd591;
+            color: #fa8c16;
+        }
+
+        .status-pending {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            color: #1890ff;
+        }
+
+        .status-absent {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+        }
+
+        .schedule-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .schedule-item {
+            flex-shrink: 0;
+            width: 100px;
+            padding: 15px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .schedule-item.active {
+            background: #e8f0fe;
+            border: 1px solid #4a90d9;
+        }
+
+        .schedule-item .day {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .schedule-item .time {
+            font-size: 12px;
+            color: #4a90d9;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4a90d9;
+        }
+
+        .stat-item .label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .stat-item.success .value { color: #52c41a; }
+        .stat-item.late .value { color: #fa8c16; }
+        .stat-item.absent .value { color: #ff4d4f; }
+
+        .record-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-info {
+            flex: 1;
+        }
+
+        .record-info .date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .record-info .detail {
+            font-size: 14px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .record-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .record-status.normal {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        .record-status.late {
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+
+        .record-status.absent {
+            background: #fff2f0;
+            color: #ff4d4f;
+        }
+
+        .record-status.leave {
+            background: #f9f0ff;
+            color: #722ed1;
+        }
+
+        .leave-form {
+            margin-top: 20px;
+        }
+
+        .leave-type-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .leave-type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .leave-type-btn.active {
+            border-color: #4a90d9;
+            background: #e8f0fe;
+            color: #4a90d9;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .date-range input {
+            flex: 1;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .student-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-info .name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .student-info .class {
+            font-size: 14px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom-color: #4a90d9;
+            color: #4a90d9;
+            font-weight: 600;
+        }
+
+        .leave-request {
+            padding: 15px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .leave-request .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .leave-request .student-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .leave-request .leave-type {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #e8f0fe;
+            color: #4a90d9;
+        }
+
+        .leave-request .date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .leave-request .reason {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 6px;
+        }
+
+        .leave-request .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .leave-request.approved {
+            border-left: 4px solid #52c41a;
+        }
+
+        .leave-request.rejected {
+            border-left: 4px solid #ff4d4f;
+        }
+
+        .leave-request.pending {
+            border-left: 4px solid #4a90d9;
+        }
+
+        .approval-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .approval-status.pending {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .approval-status.approved {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        .approval-status.rejected {
+            background: #fff2f0;
+            color: #ff4d4f;
+        }
+
+        .profile-info {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4a90d9, #6bb3f4);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+        }
+
+        .profile-info .name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .profile-info .role {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .week-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .week-stat-item {
+            text-align: center;
+            padding: 15px 10px;
+            background: #f5f7fa;
+            border-radius: 8px;
+        }
+
+        .week-stat-item .num {
+            font-size: 20px;
+            font-weight: 600;
+            color: #4a90d9;
+        }
+
+        .week-stat-item .text {
+            font-size: 10px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .today-status {
+            text-align: center;
+            padding: 20px;
+            background: #e8f0fe;
+            border-radius: 12px;
+        }
+
+        .today-status .title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .today-status .status-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4a90d9;
+        }
+
+        .schedule-view {
+            padding: 20px;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .schedule-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .schedule-table th, .schedule-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .schedule-table th {
+            background: #f5f7fa;
+            font-weight: 600;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .schedule-table td {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .schedule-table .course-name {
+            font-weight: 600;
+        }
+
+        .schedule-table .course-time {
+            color: #4a90d9;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            width: 90%;
+            max-width: 350px;
+            border-radius: 12px;
+            padding: 25px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal p {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 300;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 15px;
+            background: #fff2f0;
+            color: #ff4d4f;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .location-info {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .percentage-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .percentage-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90d9, #6bb3f4);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="login-view" class="view active">
+            <div class="login-view">
+                <div class="logo">
+                    <h1>📚 考勤系统</h1>
+                    <p>学生考勤管理平台</p>
+                </div>
+                
+                <div class="role-selector">
+                    <button class="role-btn active" onclick="selectRole('student', this)">学生</button>
+                    <button class="role-btn" onclick="selectRole('teacher', this)">教师</button>
+                    <button class="role-btn" onclick="selectRole('admin', this)">管理员</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>账号</label>
+                    <input type="text" id="login-username" placeholder="请输入账号">
+                </div>
+                
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码">
+                </div>
+                
+                <button class="btn btn-primary" onclick="login()">登 录</button>
+                
+                <div class="toggle-link" onclick="showRegister()">注册新账号</div>
+            </div>
+        </div>
+
+        <div id="register-view" class="view">
+            <div class="register-view">
+                <div class="logo">
+                    <h1>📚 考勤系统</h1>
+                    <p>注册新账号</p>
+                </div>
+                
+                <div class="role-selector">
+                    <button class="role-btn active" onclick="selectRole('student', this)">学生</button>
+                    <button class="role-btn" onclick="selectRole('teacher', this)">教师</button>
+                    <button class="role-btn" onclick="selectRole('admin', this)">管理员</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="register-name" placeholder="请输入姓名">
+                </div>
+                
+                <div class="form-group">
+                    <label>账号</label>
+                    <input type="text" id="register-username" placeholder="请输入账号">
+                </div>
+                
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="register-password" placeholder="请输入密码">
+                </div>
+                
+                <div class="form-group">
+                    <label>班级/院系/部门</label>
+                    <input type="text" id="register-class" placeholder="学生请输入班级，教师请输入院系，管理员请输入部门">
+                </div>
+                
+                <button class="btn btn-primary" onclick="register()">注 册</button>
+                
+                <div class="toggle-link" onclick="showLogin()">返回登录</div>
+            </div>
+        </div>
+
+        <div id="student-view" class="view">
+            <div class="header">
+                <h2>学生考勤</h2>
+                <div class="user-info" id="student-user-info"></div>
+            </div>
+            
+            <div class="content">
+                <div id="student-checkin-section">
+                    <div class="card">
+                        <div class="card-title">今日课程</div>
+                        <div class="schedule-list" id="student-schedule-list"></div>
+                    </div>
+                    
+                    <button class="checkin-btn" id="checkin-btn" onclick="checkin()">📸 考勤打卡</button>
+                    <div class="location-info" id="location-info">点击打卡获取位置信息</div>
+                    
+                    <div class="checkin-status" id="checkin-status"></div>
+                </div>
+
+                <div id="student-records-section" style="display:none;">
+                    <div class="filter-bar">
+                        <input type="date" id="record-date-filter">
+                        <button class="btn btn-secondary" onclick="filterRecords()">筛选</button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item success">
+                            <div class="value" id="record-stat-normal">0</div>
+                            <div class="label">正常</div>
+                        </div>
+                        <div class="stat-item late">
+                            <div class="value" id="record-stat-late">0</div>
+                            <div class="label">迟到</div>
+                        </div>
+                        <div class="stat-item absent">
+                            <div class="value" id="record-stat-absent">0</div>
+                            <div class="label">缺勤</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="value" id="record-stat-rate">0%</div>
+                            <div class="label">出勤率</div>
+                        </div>
+                    </div>
+                    
+                    <div class="record-list" id="record-list"></div>
+                </div>
+
+                <div id="student-leave-section" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">请假申请</div>
+                        <div class="leave-form">
+                            <div class="leave-type-group">
+                                <button class="leave-type-btn active" onclick="selectLeaveType('事假')">事假</button>
+                                <button class="leave-type-btn" onclick="selectLeaveType('病假')">病假</button>
+                                <button class="leave-type-btn" onclick="selectLeaveType('其他')">其他</button>
+                            </div>
+                            
+                            <div class="date-range">
+                                <input type="date" id="leave-start-date">
+                                <input type="date" id="leave-end-date">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>请假原因</label>
+                                <textarea id="leave-reason" placeholder="请输入请假原因"></textarea>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="submitLeave()">提交申请</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">我的请假记录</div>
+                        <div class="record-list" id="my-leave-list"></div>
+                    </div>
+                </div>
+
+                <div id="student-profile-section" style="display:none;">
+                    <div class="profile-info">
+                        <div class="avatar" id="student-avatar"></div>
+                        <div class="name" id="student-profile-name"></div>
+                        <div class="role">学生</div>
+                        <div class="form-group" style="margin-top:10px;">
+                            <input type="text" id="student-profile-class" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">本周统计</div>
+                        <div class="week-stats">
+                            <div class="week-stat-item">
+                                <div class="num" id="week-normal">0</div>
+                                <div class="text">正常</div>
+                            </div>
+                            <div class="week-stat-item">
+                                <div class="num" id="week-late">0</div>
+                                <div class="text">迟到</div>
+                            </div>
+                            <div class="week-stat-item">
+                                <div class="num" id="week-absent">0</div>
+                                <div class="text">缺勤</div>
+                            </div>
+                            <div class="week-stat-item">
+                                <div class="num" id="week-leave">0</div>
+                                <div class="text">请假</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:15px;">
+                            <div style="display:flex;justify-content:space-between;font-size:14px;">
+                                <span>本周出勤率</span>
+                                <span id="week-rate">0%</span>
+                            </div>
+                            <div class="percentage-bar">
+                                <div class="fill" id="week-rate-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">今日考勤状态</div>
+                        <div class="today-status" id="today-status">
+                            <div class="title">今日状态</div>
+                            <div class="status-text" id="today-status-text">未打卡</div>
+                        </div>
+                    </div>
+                    
+                    <button class="logout-btn" onclick="logout()">退出登录</button>
+                </div>
+            </div>
+            
+            <div class="nav">
+                <div class="nav-item active" onclick="switchStudentTab('checkin', this)">
+                    <i>🏠</i>
+                    <span>打卡</span>
+                </div>
+                <div class="nav-item" onclick="switchStudentTab('records', this)">
+                    <i>📋</i>
+                    <span>记录</span>
+                </div>
+                <div class="nav-item" onclick="switchStudentTab('leave', this)">
+                    <i>📝</i>
+                    <span>请假</span>
+                </div>
+                <div class="nav-item" onclick="switchStudentTab('profile', this)">
+                    <i>👤</i>
+                    <span>我的</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="teacher-view" class="view">
+            <div class="header">
+                <h2>教师管理</h2>
+                <div class="user-info" id="teacher-user-info"></div>
+            </div>
+            
+            <div class="content">
+                <div id="teacher-dashboard-section">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="value" id="dash-total">0</div>
+                            <div class="label">总人数</div>
+                        </div>
+                        <div class="stat-item success">
+                            <div class="value" id="dash-checked">0</div>
+                            <div class="label">已打卡</div>
+                        </div>
+                        <div class="stat-item late">
+                            <div class="value" id="dash-late">0</div>
+                            <div class="label">迟到</div>
+                        </div>
+                        <div class="stat-item absent">
+                            <div class="value" id="dash-absent">0</div>
+                            <div class="label">缺勤</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">今日出勤率</div>
+                        <div class="today-status">
+                            <div class="title">整体出勤情况</div>
+                            <div class="status-text" id="dash-rate">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="teacher-students-section" style="display:none;">
+                    <div class="filter-bar">
+                        <input type="text" id="student-search" placeholder="搜索学生姓名" oninput="searchStudents()">
+                    </div>
+                    <div class="student-list" id="student-list"></div>
+                </div>
+
+                <div id="teacher-leave-section" style="display:none;">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchLeaveTab('pending', this)">待审批</div>
+                        <div class="tab" onclick="switchLeaveTab('approved', this)">已批准</div>
+                        <div class="tab" onclick="switchLeaveTab('rejected', this)">已拒绝</div>
+                    </div>
+                    <div class="leave-list" id="leave-list"></div>
+                </div>
+
+                <div id="teacher-schedule-section" style="display:none;">
+                    <div class="schedule-view">
+                        <div class="schedule-header">
+                            <h3>课程表管理</h3>
+                            <button class="btn btn-secondary" style="padding:8px 16px;font-size:12px;" onclick="showAddCourseModal()">+ 添加课程</button>
+                        </div>
+                        <table class="schedule-table" id="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>课程名称</th>
+                                    <th>星期</th>
+                                    <th>开始时间</th>
+                                    <th>结束时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedule-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav">
+                <div class="nav-item active" onclick="switchTeacherTab('dashboard', this)">
+                    <i>📊</i>
+                    <span>概览</span>
+                </div>
+                <div class="nav-item" onclick="switchTeacherTab('students', this)">
+                    <i>👥</i>
+                    <span>学生</span>
+                </div>
+                <div class="nav-item" onclick="switchTeacherTab('leave', this)">
+                    <i>📝</i>
+                    <span>审批</span>
+                </div>
+                <div class="nav-item" onclick="switchTeacherTab('schedule', this)">
+                    <i>📅</i>
+                    <span>课程表</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-view" class="view">
+            <div class="header">
+                <h2>教务处管理</h2>
+                <div class="user-info" id="admin-user-info"></div>
+            </div>
+            
+            <div class="content">
+                <div id="admin-import-section">
+                    <div class="card">
+                        <div class="card-title">📥 数据导入</div>
+                        <div class="tabs" style="margin-bottom:15px;">
+                            <div class="tab active" onclick="switchImportTab('students', this)">学生名册</div>
+                            <div class="tab" onclick="switchImportTab('teachers', this)">教师信息</div>
+                            <div class="tab" onclick="switchImportTab('schedule', this)">课程表</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>CSV文件上传或粘贴内容</label>
+                            <input type="file" id="import-file" accept=".csv" onchange="handleFileSelect(event)" style="margin-bottom:10px;">
+                            <textarea id="import-textarea" placeholder="请粘贴CSV格式数据或上传文件...&#10;&#10;学生格式示例：&#10;姓名,账号,密码,班级&#10;张三,zhangsan,123456,计算机202班&#10;李四,lisi,123456,计算机202班&#10;&#10;教师格式示例：&#10;姓名,账号,密码,院系&#10;王老师,teacher1,123456,计算机学院&#10;&#10;课程表格式示例：&#10;课程名称,星期,开始时间,结束时间&#10;高等数学,周一,08:00,09:40&#10;大学英语,周二,08:00,09:40" rows="8"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="previewImport()">预览数据</button>
+                    </div>
+                    
+                    <div id="import-preview" style="display:none;">
+                        <div class="card">
+                            <div class="card-title">📋 导入预览</div>
+                            <div id="preview-table-container" style="overflow-x:auto;"></div>
+                            <div style="margin-top:15px;color:#666;font-size:14px;" id="import-validation"></div>
+                            <button class="btn btn-primary" style="margin-top:15px;" onclick="confirmImport()">确认导入</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-manage-section" style="display:none;">
+                    <div class="tabs" style="margin-bottom:15px;">
+                        <div class="tab active" onclick="switchManageTab('students', this)">学生管理</div>
+                        <div class="tab" onclick="switchManageTab('teachers', this)">教师管理</div>
+                        <div class="tab" onclick="switchManageTab('schedule', this)">课程管理</div>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <input type="text" id="manage-search" placeholder="搜索..." oninput="searchManageData()">
+                    </div>
+                    
+                    <div id="manage-list"></div>
+                </div>
+
+                <div id="admin-settings-section" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">📊 数据统计</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="value" id="stat-students">0</div>
+                                <div class="label">学生总数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value" id="stat-teachers">0</div>
+                                <div class="label">教师总数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value" id="stat-courses">0</div>
+                                <div class="label">课程总数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="value" id="stat-attendance">0</div>
+                                <div class="label">考勤记录</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">📤 数据导出</div>
+                        <button class="btn btn-secondary" onclick="exportData('students')">导出学生数据</button>
+                        <button class="btn btn-secondary" onclick="exportData('teachers')" style="margin-top:10px;">导出教师数据</button>
+                        <button class="btn btn-secondary" onclick="exportData('schedule')" style="margin-top:10px;">导出课程表</button>
+                        <button class="btn btn-secondary" onclick="exportData('attendance')" style="margin-top:10px;">导出考勤记录</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">🔄 系统操作</div>
+                        <button class="btn btn-secondary" onclick="restoreDefaultSchedule()">恢复默认课程表</button>
+                        <button class="btn btn-reject" style="margin-top:10px;width:100%;padding:14px;" onclick="resetAllData()">⚠️ 重置所有数据</button>
+                    </div>
+                    
+                    <button class="logout-btn" onclick="logout()">退出登录</button>
+                </div>
+            </div>
+            
+            <div class="nav">
+                <div class="nav-item active" onclick="switchAdminTab('import', this)">
+                    <i>📥</i>
+                    <span>导入</span>
+                </div>
+                <div class="nav-item" onclick="switchAdminTab('manage', this)">
+                    <i>📋</i>
+                    <span>管理</span>
+                </div>
+                <div class="nav-item" onclick="switchAdminTab('settings', this)">
+                    <i>⚙️</i>
+                    <span>设置</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal">
+                <h3 id="modal-title">提示</h3>
+                <p id="modal-content"></p>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button class="btn btn-primary" id="modal-confirm-btn" onclick="confirmModal()">确定</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+        let currentRole = 'student';
+        let currentUser = null;
+        let selectedLeaveType = '事假';
+        let currentLeaveTab = 'pending';
+        let modalCallback = null;
+        let importPreviewData = [];
+
+        const WEEK_DAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        
+        const DEFAULT_SCHEDULE = [
+            { id: 1, courseName: '高等数学', dayOfWeek: 1, startTime: '08:00', endTime: '09:40' },
+            { id: 2, courseName: '大学英语', dayOfWeek: 2, startTime: '08:00', endTime: '09:40' },
+            { id: 3, courseName: '计算机基础', dayOfWeek: 3, startTime: '08:00', endTime: '09:40' },
+            { id: 4, courseName: '线性代数', dayOfWeek: 4, startTime: '08:00', endTime: '09:40' },
+            { id: 5, courseName: '程序设计', dayOfWeek: 5, startTime: '14:00', endTime: '15:40' },
+            { id: 6, courseName: '物理实验', dayOfWeek: 1, startTime: '14:00', endTime: '15:40' },
+            { id: 7, courseName: '数据结构', dayOfWeek: 2, startTime: '14:00', endTime: '15:40' },
+            { id: 8, courseName: '概率论', dayOfWeek: 3, startTime: '14:00', endTime: '15:40' },
+        ];
+
+        function initData() {
+            if (!localStorage.getItem('users')) {
+                localStorage.setItem('users', JSON.stringify([
+                    { id: 1, name: '张三', username: 'student1', password: '123456', role: 'student', className: '计算机202班' },
+                    { id: 2, name: '李四', username: 'student2', password: '123456', role: 'student', className: '计算机202班' },
+                    { id: 3, name: '王五', username: 'student3', password: '123456', role: 'student', className: '计算机202班' },
+                    { id: 4, name: '赵老师', username: 'teacher1', password: '123456', role: 'teacher', className: '计算机学院' },
+                    { id: 5, name: '孙老师', username: 'teacher2', password: '123456', role: 'teacher', className: '数学学院' },
+                    { id: 6, name: '管理员', username: 'admin1', password: '123456', role: 'admin', className: '教务处' },
+                ]));
+            }
+            
+            if (!localStorage.getItem('schedule')) {
+                localStorage.setItem('schedule', JSON.stringify(DEFAULT_SCHEDULE));
+            }
+            
+            if (!localStorage.getItem('attendance')) {
+                localStorage.setItem('attendance', JSON.stringify([]));
+            }
+            
+            if (!localStorage.getItem('leaveRequests')) {
+                localStorage.setItem('leaveRequests', JSON.stringify([]));
+            }
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function selectRole(role, el) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function showLogin() {
+            showView('login-view');
+        }
+
+        function showRegister() {
+            showView('register-view');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            
+            if (!username || !password) {
+                showToast('请输入账号和密码');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.username === username && u.password === password && u.role === currentRole);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                if (user.role === 'student') {
+                    showView('student-view');
+                    initStudentView();
+                } else if (user.role === 'teacher') {
+                    showView('teacher-view');
+                    initTeacherView();
+                } else {
+                    showView('admin-view');
+                    initAdminView();
+                }
+            } else {
+                showToast('账号或密码错误');
+            }
+        }
+
+        function register() {
+            const name = document.getElementById('register-name').value.trim();
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            const className = document.getElementById('register-class').value.trim();
+            
+            if (!name || !username || !password || !className) {
+                showToast('请填写完整信息');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (users.find(u => u.username === username)) {
+                showToast('账号已存在');
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                name,
+                username,
+                password,
+                role: currentRole,
+                className
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            showToast('注册成功，请登录');
+            showLogin();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showLogin();
+        }
+
+        function initStudentView() {
+            document.getElementById('student-user-info').textContent = `${currentUser.name} - ${currentUser.className}`;
+            document.getElementById('student-profile-name').textContent = currentUser.name;
+            document.getElementById('student-profile-class').value = currentUser.className;
+            document.getElementById('student-avatar').textContent = currentUser.name.charAt(0);
+            
+            loadStudentSchedule();
+            updateCheckinStatus();
+            loadRecords();
+            loadMyLeaves();
+            updateWeekStats();
+            updateTodayStatus();
+        }
+
+        function initTeacherView() {
+            document.getElementById('teacher-user-info').textContent = `${currentUser.name} - ${currentUser.className}`;
+            updateDashboard();
+            loadStudentList();
+            loadLeaveRequests();
+            loadScheduleTable();
+        }
+
+        function switchStudentTab(tab, el) {
+            document.querySelectorAll('#student-view .nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            ['checkin', 'records', 'leave', 'profile'].forEach(t => {
+                document.getElementById(`student-${t}-section`).style.display = t === tab ? 'block' : 'none';
+            });
+            
+            if (tab === 'records') loadRecords();
+            if (tab === 'leave') loadMyLeaves();
+            if (tab === 'profile') {
+                updateWeekStats();
+                updateTodayStatus();
+            }
+        }
+
+        function switchTeacherTab(tab, el) {
+            document.querySelectorAll('#teacher-view .nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            ['dashboard', 'students', 'leave', 'schedule'].forEach(t => {
+                document.getElementById(`teacher-${t}-section`).style.display = t === tab ? 'block' : 'none';
+            });
+            
+            if (tab === 'dashboard') updateDashboard();
+            if (tab === 'students') loadStudentList();
+            if (tab === 'leave') loadLeaveRequests();
+            if (tab === 'schedule') loadScheduleTable();
+        }
+
+        function loadStudentSchedule() {
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            const today = new Date().getDay();
+            const todaySchedule = schedule.filter(s => s.dayOfWeek === today);
+            
+            const container = document.getElementById('student-schedule-list');
+            container.innerHTML = '';
+            
+            if (todaySchedule.length === 0) {
+                container.innerHTML = '<div style="width:100%;text-align:center;color:#999;">今日无课程</div>';
+                document.getElementById('checkin-btn').classList.add('disabled');
+                return;
+            }
+            
+            todaySchedule.forEach(course => {
+                const item = document.createElement('div');
+                item.className = 'schedule-item';
+                item.innerHTML = `
+                    <div class="day">${course.courseName}</div>
+                    <div class="time">${course.startTime}-${course.endTime}</div>
+                `;
+                
+                const now = new Date();
+                const currentTime = now.getHours() * 60 + now.getMinutes();
+                const [startH, startM] = course.startTime.split(':').map(Number);
+                const [endH, endM] = course.endTime.split(':').map(Number);
+                const startTime = startH * 60 + startM;
+                const endTime = endH * 60 + endM;
+                
+                if (currentTime >= startTime && currentTime <= endTime) {
+                    item.classList.add('active');
+                }
+                
+                container.appendChild(item);
+            });
+            
+            checkCheckinTime();
+        }
+
+        function checkCheckinTime() {
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            const today = new Date().getDay();
+            const todaySchedule = schedule.filter(s => s.dayOfWeek === today);
+            
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            let inTimeWindow = false;
+            todaySchedule.forEach(course => {
+                const [startH, startM] = course.startTime.split(':').map(Number);
+                const startTime = startH * 60 + startM;
+                const endTime = startTime + 30;
+                
+                if (currentTime >= startTime && currentTime <= endTime) {
+                    inTimeWindow = true;
+                }
+            });
+            
+            const btn = document.getElementById('checkin-btn');
+            if (inTimeWindow && !hasCheckedInToday()) {
+                btn.classList.remove('disabled');
+            } else {
+                btn.classList.add('disabled');
+                if (hasCheckedInToday()) {
+                    btn.textContent = '✅ 今日已打卡';
+                } else {
+                    btn.textContent = '⏰ 不在打卡时间';
+                }
+            }
+        }
+
+        function hasCheckedInToday() {
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            return attendance.some(a => a.studentId === currentUser.id && a.date === today);
+        }
+
+        function checkin() {
+            if (document.getElementById('checkin-btn').classList.contains('disabled')) {
+                showToast('当前不在打卡时间或已打卡');
+                return;
+            }
+            
+            if (!navigator.geolocation) {
+                showToast('您的浏览器不支持位置服务');
+                submitCheckin(null);
+                return;
+            }
+            
+            showToast('正在获取位置信息...');
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    submitCheckin(location);
+                },
+                (error) => {
+                    showToast('获取位置失败，将使用默认位置');
+                    submitCheckin({ lat: 39.9042, lng: 116.4074 });
+                },
+                { timeout: 10000 }
+            );
+        }
+
+        function submitCheckin(location) {
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const todaySchedule = schedule.filter(s => s.dayOfWeek === dayOfWeek);
+            
+            if (todaySchedule.length === 0) {
+                showToast('今日无课程，无需打卡');
+                return;
+            }
+            
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            let course = null;
+            for (const c of todaySchedule) {
+                const [startH, startM] = c.startTime.split(':').map(Number);
+                const startTime = startH * 60 + startM;
+                const endTime = startTime + 30;
+                
+                if (currentTime >= startTime && currentTime <= endTime) {
+                    course = c;
+                    break;
+                }
+            }
+            
+            if (!course) {
+                course = todaySchedule[todaySchedule.length - 1];
+            }
+            
+            const [startH, startM] = course.startTime.split(':').map(Number);
+            const startTime = startH * 60 + startM;
+            
+            let status = 'normal';
+            let statusText = '正常';
+            
+            if (currentTime > startTime + 30) {
+                status = 'late';
+                statusText = '迟到';
+            } else if (currentTime > startTime) {
+                status = 'late';
+                statusText = '迟到';
+            }
+            
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const newRecord = {
+                id: Date.now(),
+                studentId: currentUser.id,
+                date: today.toISOString().split('T')[0],
+                time: now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+                status,
+                location,
+                courseName: course.courseName
+            };
+            
+            attendance.push(newRecord);
+            localStorage.setItem('attendance', JSON.stringify(attendance));
+            
+            showToast(`打卡成功！状态：${statusText}`);
+            updateCheckinStatus();
+            checkCheckinTime();
+        }
+
+        function updateCheckinStatus() {
+            const statusDiv = document.getElementById('checkin-status');
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecord = attendance.find(a => a.studentId === currentUser.id && a.date === today);
+            
+            if (todayRecord) {
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (todayRecord.status) {
+                    case 'normal':
+                        statusClass = 'status-success';
+                        statusText = `✅ 今日已打卡\n${todayRecord.time} - ${todayRecord.courseName}\n状态：正常`;
+                        break;
+                    case 'late':
+                        statusClass = 'status-late';
+                        statusText = `⏰ 今日已打卡\n${todayRecord.time} - ${todayRecord.courseName}\n状态：迟到`;
+                        break;
+                    case 'leave':
+                        statusClass = 'status-pending';
+                        statusText = `📝 今日请假\n状态：已批准`;
+                        break;
+                }
+                
+                statusDiv.className = `checkin-status ${statusClass}`;
+                statusDiv.innerHTML = statusText.replace(/\n/g, '<br>');
+                statusDiv.style.display = 'block';
+            } else {
+                statusDiv.style.display = 'none';
+            }
+        }
+
+        function filterRecords() {
+            loadRecords();
+        }
+
+        function loadRecords() {
+            const dateFilter = document.getElementById('record-date-filter').value;
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            
+            let records = attendance.filter(a => a.studentId === currentUser.id);
+            
+            if (dateFilter) {
+                records = records.filter(r => r.date === dateFilter);
+            }
+            
+            records.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const normalCount = records.filter(r => r.status === 'normal').length;
+            const lateCount = records.filter(r => r.status === 'late').length;
+            const absentCount = records.filter(r => r.status === 'absent').length;
+            const total = records.length;
+            const rate = total > 0 ? Math.round(((normalCount + lateCount) / total) * 100) : 0;
+            
+            document.getElementById('record-stat-normal').textContent = normalCount;
+            document.getElementById('record-stat-late').textContent = lateCount;
+            document.getElementById('record-stat-absent').textContent = absentCount;
+            document.getElementById('record-stat-rate').textContent = `${rate}%`;
+            
+            const container = document.getElementById('record-list');
+            container.innerHTML = '';
+            
+            if (records.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">暂无考勤记录</div>';
+                return;
+            }
+            
+            records.forEach(record => {
+                const item = document.createElement('div');
+                item.className = 'record-item';
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (record.status) {
+                    case 'normal':
+                        statusClass = 'normal';
+                        statusText = '正常';
+                        break;
+                    case 'late':
+                        statusClass = 'late';
+                        statusText = '迟到';
+                        break;
+                    case 'absent':
+                        statusClass = 'absent';
+                        statusText = '缺勤';
+                        break;
+                    case 'leave':
+                        statusClass = 'leave';
+                        statusText = '请假';
+                        break;
+                }
+                
+                item.innerHTML = `
+                    <div class="record-info">
+                        <div class="date">${record.date}</div>
+                        <div class="detail">${record.courseName} ${record.time}</div>
+                    </div>
+                    <div class="record-status ${statusClass}">${statusText}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function selectLeaveType(type) {
+            selectedLeaveType = type;
+            document.querySelectorAll('.leave-type-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function submitLeave() {
+            const startDate = document.getElementById('leave-start-date').value;
+            const endDate = document.getElementById('leave-end-date').value;
+            const reason = document.getElementById('leave-reason').value.trim();
+            
+            if (!startDate || !endDate || !reason) {
+                showToast('请填写完整信息');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('开始日期不能晚于结束日期');
+                return;
+            }
+            
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const newRequest = {
+                id: Date.now(),
+                studentId: currentUser.id,
+                studentName: currentUser.name,
+                className: currentUser.className,
+                type: selectedLeaveType,
+                startDate,
+                endDate,
+                reason,
+                status: 'pending',
+                applyTime: new Date().toLocaleString('zh-CN')
+            };
+            
+            leaveRequests.push(newRequest);
+            localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+            
+            showToast('请假申请已提交');
+            document.getElementById('leave-start-date').value = '';
+            document.getElementById('leave-end-date').value = '';
+            document.getElementById('leave-reason').value = '';
+            loadMyLeaves();
+        }
+
+        function loadMyLeaves() {
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const myLeaves = leaveRequests.filter(l => l.studentId === currentUser.id);
+            myLeaves.sort((a, b) => new Date(b.applyTime) - new Date(a.applyTime));
+            
+            const container = document.getElementById('my-leave-list');
+            container.innerHTML = '';
+            
+            if (myLeaves.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">暂无请假记录</div>';
+                return;
+            }
+            
+            myLeaves.forEach(leave => {
+                const item = document.createElement('div');
+                item.className = 'record-item';
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (leave.status) {
+                    case 'pending':
+                        statusClass = 'pending';
+                        statusText = '待审批';
+                        break;
+                    case 'approved':
+                        statusClass = 'approved';
+                        statusText = '已批准';
+                        break;
+                    case 'rejected':
+                        statusClass = 'rejected';
+                        statusText = '已拒绝';
+                        break;
+                }
+                
+                item.innerHTML = `
+                    <div class="record-info">
+                        <div class="date">${leave.type}</div>
+                        <div class="detail">${leave.startDate} 至 ${leave.endDate}</div>
+                    </div>
+                    <div class="approval-status ${statusClass}">${statusText}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateWeekStats() {
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            const weekRecords = attendance.filter(a => {
+                const date = new Date(a.date);
+                return date >= startOfWeek && date <= endOfWeek && a.studentId === currentUser.id;
+            });
+            
+            const weekLeaves = leaveRequests.filter(l => {
+                return l.studentId === currentUser.id && l.status === 'approved';
+            });
+            
+            const normalCount = weekRecords.filter(r => r.status === 'normal').length;
+            const lateCount = weekRecords.filter(r => r.status === 'late').length;
+            const absentCount = weekRecords.filter(r => r.status === 'absent').length;
+            const leaveCount = weekLeaves.length;
+            
+            const totalClasses = 5;
+            const attended = normalCount + lateCount;
+            const rate = totalClasses > 0 ? Math.round((attended / totalClasses) * 100) : 0;
+            
+            document.getElementById('week-normal').textContent = normalCount;
+            document.getElementById('week-late').textContent = lateCount;
+            document.getElementById('week-absent').textContent = absentCount;
+            document.getElementById('week-leave').textContent = leaveCount;
+            document.getElementById('week-rate').textContent = `${rate}%`;
+            document.getElementById('week-rate-bar').style.width = `${rate}%`;
+        }
+
+        function updateTodayStatus() {
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecord = attendance.find(a => a.studentId === currentUser.id && a.date === today);
+            
+            let statusText = '未打卡';
+            
+            if (todayRecord) {
+                switch (todayRecord.status) {
+                    case 'normal':
+                        statusText = '✅ 正常';
+                        break;
+                    case 'late':
+                        statusText = '⏰ 迟到';
+                        break;
+                    case 'leave':
+                        statusText = '📝 请假';
+                        break;
+                }
+            }
+            
+            document.getElementById('today-status-text').textContent = statusText;
+        }
+
+        function updateDashboard() {
+            const students = JSON.parse(localStorage.getItem('users') || '[]').filter(u => u.role === 'student');
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            
+            const todayAttendance = attendance.filter(a => a.date === today);
+            
+            const checkedCount = todayAttendance.length;
+            const lateCount = todayAttendance.filter(a => a.status === 'late').length;
+            const absentCount = students.length - checkedCount;
+            const rate = students.length > 0 ? Math.round((checkedCount / students.length) * 100) : 0;
+            
+            document.getElementById('dash-total').textContent = students.length;
+            document.getElementById('dash-checked').textContent = checkedCount;
+            document.getElementById('dash-late').textContent = lateCount;
+            document.getElementById('dash-absent').textContent = absentCount;
+            document.getElementById('dash-rate').textContent = `${rate}%`;
+        }
+
+        function searchStudents() {
+            loadStudentList();
+        }
+
+        function loadStudentList() {
+            const searchText = document.getElementById('student-search').value.toLowerCase();
+            const students = JSON.parse(localStorage.getItem('users') || '[]').filter(u => u.role === 'student');
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            
+            const filteredStudents = students.filter(s => 
+                s.name.toLowerCase().includes(searchText) || 
+                s.className.toLowerCase().includes(searchText)
+            );
+            
+            const container = document.getElementById('student-list');
+            container.innerHTML = '';
+            
+            filteredStudents.forEach(student => {
+                const todayRecord = attendance.find(a => a.studentId === student.id && a.date === today);
+                
+                let status = '缺勤';
+                let statusClass = 'absent';
+                
+                if (todayRecord) {
+                    switch (todayRecord.status) {
+                        case 'normal':
+                            status = '正常';
+                            statusClass = 'normal';
+                            break;
+                        case 'late':
+                            status = '迟到';
+                            statusClass = 'late';
+                            break;
+                        case 'leave':
+                            status = '请假';
+                            statusClass = 'leave';
+                            break;
+                    }
+                }
+                
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <div class="student-info">
+                        <div class="name">${student.name}</div>
+                        <div class="class">${student.className}</div>
+                    </div>
+                    <div class="record-status ${statusClass}">${status}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function switchLeaveTab(tab, el) {
+            currentLeaveTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            loadLeaveRequests();
+        }
+
+        function loadLeaveRequests() {
+            const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+            const filtered = leaveRequests.filter(l => l.status === currentLeaveTab);
+            filtered.sort((a, b) => new Date(b.applyTime) - new Date(a.applyTime));
+            
+            const container = document.getElementById('leave-list');
+            container.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">暂无数据</div>';
+                return;
+            }
+            
+            filtered.forEach(leave => {
+                const item = document.createElement('div');
+                item.className = `leave-request ${leave.status}`;
+                
+                let actions = '';
+                if (leave.status === 'pending') {
+                    actions = `
+                        <div class="actions">
+                            <button class="btn btn-reject" onclick="rejectLeave(${leave.id})">拒绝</button>
+                            <button class="btn btn-approve" onclick="approveLeave(${leave.id})">批准</button>
+                        </div>
+                    `;
+                }
+                
+                item.innerHTML = `
+                    <div class="header-row">
+                        <div class="student-name">${leave.studentName}</div>
+                        <div class="leave-type">${leave.type}</div>
+                    </div>
+                    <div class="date">${leave.className} | ${leave.startDate} 至 ${leave.endDate}</div>
+                    <div class="reason">${leave.reason}</div>
+                    ${actions}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function approveLeave(id) {
+            showModal('确认批准', '确定要批准这条请假申请吗？', () => {
+                const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+                const leave = leaveRequests.find(l => l.id === id);
+                if (leave) {
+                    leave.status = 'approved';
+                    localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+                    showToast('已批准');
+                    loadLeaveRequests();
+                }
+            });
+        }
+
+        function rejectLeave(id) {
+            showModal('确认拒绝', '确定要拒绝这条请假申请吗？', () => {
+                const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests') || '[]');
+                const leave = leaveRequests.find(l => l.id === id);
+                if (leave) {
+                    leave.status = 'rejected';
+                    localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+                    showToast('已拒绝');
+                    loadLeaveRequests();
+                }
+            });
+        }
+
+        function showModal(title, content, callback) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').textContent = content;
+            document.getElementById('modal-overlay').classList.add('active');
+            modalCallback = callback;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            modalCallback = null;
+        }
+
+        function confirmModal() {
+            if (modalCallback) {
+                modalCallback();
+            }
+            closeModal();
+        }
+
+        function loadScheduleTable() {
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            const tbody = document.getElementById('schedule-tbody');
+            tbody.innerHTML = '';
+            
+            schedule.forEach(course => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="course-name">${course.courseName}</td>
+                    <td>${WEEK_DAYS[course.dayOfWeek]}</td>
+                    <td class="course-time">${course.startTime}</td>
+                    <td>${course.endTime}</td>
+                    <td><button class="btn btn-grey" onclick="deleteCourse(${course.id})">删除</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function showAddCourseModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal">
+                    <h3>添加课程</h3>
+                    <div style="text-align:left;">
+                        <div class="form-group">
+                            <label>课程名称</label>
+                            <input type="text" id="new-course-name" placeholder="请输入课程名称">
+                        </div>
+                        <div class="form-group">
+                            <label>星期</label>
+                            <select id="new-course-day">
+                                <option value="1">周一</option>
+                                <option value="2">周二</option>
+                                <option value="3">周三</option>
+                                <option value="4">周四</option>
+                                <option value="5">周五</option>
+                                <option value="6">周六</option>
+                                <option value="0">周日</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>开始时间</label>
+                            <input type="time" id="new-course-start">
+                        </div>
+                        <div class="form-group">
+                            <label>结束时间</label>
+                            <input type="time" id="new-course-end">
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">取消</button>
+                        <button class="btn btn-primary" onclick="addCourse()">确定</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function addCourse() {
+            const name = document.getElementById('new-course-name').value.trim();
+            const day = parseInt(document.getElementById('new-course-day').value);
+            const start = document.getElementById('new-course-start').value;
+            const end = document.getElementById('new-course-end').value;
+            
+            if (!name || !start || !end) {
+                showToast('请填写完整信息');
+                return;
+            }
+            
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            schedule.push({
+                id: Date.now(),
+                courseName: name,
+                dayOfWeek: day,
+                startTime: start,
+                endTime: end
+            });
+            localStorage.setItem('schedule', JSON.stringify(schedule));
+            
+            document.querySelector('.modal-overlay.active').remove();
+            showToast('课程添加成功');
+            loadScheduleTable();
+        }
+
+        function deleteCourse(id) {
+            showModal('确认删除', '确定要删除这门课程吗？', () => {
+                const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+                const updated = schedule.filter(c => c.id !== id);
+                localStorage.setItem('schedule', JSON.stringify(updated));
+                showToast('课程已删除');
+                loadScheduleTable();
+            });
+        }
+
+        let currentImportTab = 'students';
+        let currentManageTab = 'students';
+
+        function initAdminView() {
+            document.getElementById('admin-user-info').textContent = `${currentUser.name} - ${currentUser.className}`;
+            updateAdminStats();
+        }
+
+        function switchAdminTab(tab, el) {
+            document.querySelectorAll('#admin-view .nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            
+            ['import', 'manage', 'settings'].forEach(t => {
+                document.getElementById(`admin-${t}-section`).style.display = t === tab ? 'block' : 'none';
+            });
+            
+            if (tab === 'manage') loadManageList();
+            if (tab === 'settings') updateAdminStats();
+        }
+
+        function switchImportTab(tab, el) {
+            currentImportTab = tab;
+            document.querySelectorAll('#admin-import-section .tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('import-preview').style.display = 'none';
+            
+            const placeholders = {
+                students: '请粘贴CSV格式数据或上传文件...\n\n学生格式示例：\n姓名,账号,密码,班级\n张三,zhangsan,123456,计算机202班\n李四,lisi,123456,计算机202班',
+                teachers: '请粘贴CSV格式数据或上传文件...\n\n教师格式示例：\n姓名,账号,密码,院系\n王老师,teacher1,123456,计算机学院\n李老师,teacher2,123456,数学学院',
+                schedule: '请粘贴CSV格式数据或上传文件...\n\n课程表格式示例：\n课程名称,星期,开始时间,结束时间\n高等数学,周一,08:00,09:40\n大学英语,周二,08:00,09:40'
+            };
+            document.getElementById('import-textarea').placeholder = placeholders[tab];
+        }
+
+        function switchManageTab(tab, el) {
+            currentManageTab = tab;
+            document.querySelectorAll('#admin-manage-section .tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            loadManageList();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('import-textarea').value = e.target.result;
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const data = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const values = [];
+                let currentValue = '';
+                let inQuotes = false;
+                
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    
+                    if (char === '"' && !inQuotes) {
+                        inQuotes = true;
+                    } else if (char === '"' && inQuotes) {
+                        if (line[j + 1] === '"') {
+                            currentValue += '"';
+                            j++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                
+                values.push(currentValue.trim());
+                data.push(values);
+            }
+            
+            return data;
+        }
+
+        function previewImport() {
+            const text = document.getElementById('import-textarea').value.trim();
+            if (!text) {
+                showToast('请输入数据');
+                return;
+            }
+            
+            const csvData = parseCSV(text);
+            if (csvData.length === 0) {
+                showToast('数据格式错误');
+                return;
+            }
+            
+            let headers = [];
+            let rows = [];
+            let hasHeader = false;
+            
+            if (currentImportTab === 'students') {
+                headers = ['姓名', '账号', '密码', '班级'];
+                hasHeader = csvData.length > 0 && csvData[0][0] === '姓名';
+                rows = hasHeader ? csvData.slice(1) : csvData;
+            } else if (currentImportTab === 'teachers') {
+                headers = ['姓名', '账号', '密码', '院系'];
+                hasHeader = csvData.length > 0 && csvData[0][0] === '姓名';
+                rows = hasHeader ? csvData.slice(1) : csvData;
+            } else if (currentImportTab === 'schedule') {
+                headers = ['课程名称', '星期', '开始时间', '结束时间'];
+                hasHeader = csvData.length > 0 && csvData[0][0] === '课程名称';
+                rows = hasHeader ? csvData.slice(1) : csvData;
+            }
+            
+            if (rows.length === 0) {
+                showToast('未检测到有效数据，请检查格式');
+                return;
+            }
+            
+            importPreviewData = rows;
+            
+            let tableHtml = `<div style="margin-bottom:10px;color:#666;">解析到 ${rows.length} 条数据${hasHeader ? '（已自动跳过表头）' : ''}</div>`;
+            tableHtml += `<table class="schedule-table"><thead><tr>`;
+            headers.forEach(h => tableHtml += `<th>${h}</th>`);
+            tableHtml += '</tr></thead><tbody>';
+            
+            rows.forEach((row, index) => {
+                tableHtml += `<tr>`;
+                row.forEach(cell => tableHtml += `<td>${cell}</td>`);
+                tableHtml += '</tr>';
+            });
+            
+            tableHtml += '</tbody></table>';
+            
+            document.getElementById('preview-table-container').innerHTML = tableHtml;
+            document.getElementById('import-preview').style.display = 'block';
+            
+            validateImport(rows);
+        }
+
+        function validateImport(rows) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            let errors = [];
+            let warnings = [];
+            
+            rows.forEach((row, index) => {
+                if (currentImportTab === 'students' || currentImportTab === 'teachers') {
+                    if (row.length < 4) {
+                        errors.push(`第${index + 1}行数据不完整`);
+                        return;
+                    }
+                    
+                    const username = row[1];
+                    const existingUser = users.find(u => u.username === username);
+                    if (existingUser) {
+                        warnings.push(`第${index + 1}行账号 "${username}" 已存在`);
+                    }
+                } else if (currentImportTab === 'schedule') {
+                    if (row.length < 4) {
+                        errors.push(`第${index + 1}行数据不完整`);
+                        return;
+                    }
+                    
+                    const dayMap = { '周一': 1, '周二': 2, '周三': 3, '周四': 4, '周五': 5, '周六': 6, '周日': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '0': 0 };
+                    if (!dayMap[row[1]]) {
+                        errors.push(`第${index + 1}行星期格式错误`);
+                    }
+                    
+                    const timeRegex = /^\d{2}:\d{2}$/;
+                    if (!timeRegex.test(row[2]) || !timeRegex.test(row[3])) {
+                        errors.push(`第${index + 1}行时间格式错误`);
+                    }
+                }
+            });
+            
+            const container = document.getElementById('import-validation');
+            
+            if (errors.length > 0 || warnings.length > 0) {
+                let html = '';
+                if (errors.length > 0) {
+                    html += `<div style="color:#ff4d4f;margin-bottom:10px;">❌ 错误：${errors.join('；')}</div>`;
+                }
+                if (warnings.length > 0) {
+                    html += `<div style="color:#fa8c16;">⚠️ 警告：${warnings.join('；')}</div>`;
+                }
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div style="color:#52c41a;">✅ 数据验证通过</div>';
+            }
+        }
+
+        function confirmImport() {
+            if (!importPreviewData || importPreviewData.length === 0) {
+                showToast('请先预览数据');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            let insertedCount = 0;
+            
+            if (currentImportTab === 'students') {
+                importPreviewData.forEach((row, index) => {
+                    if (row.length >= 4) {
+                        const existingUser = users.find(u => u.username === row[1]);
+                        if (!existingUser) {
+                            users.push({
+                                id: Date.now() + index,
+                                name: row[0],
+                                username: row[1],
+                                password: row[2],
+                                role: 'student',
+                                className: row[3]
+                            });
+                            insertedCount++;
+                        }
+                    }
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+                showToast(`成功导入 ${insertedCount} 条学生数据`);
+            } else if (currentImportTab === 'teachers') {
+                importPreviewData.forEach((row, index) => {
+                    if (row.length >= 4) {
+                        const existingUser = users.find(u => u.username === row[1]);
+                        if (!existingUser) {
+                            users.push({
+                                id: Date.now() + index,
+                                name: row[0],
+                                username: row[1],
+                                password: row[2],
+                                role: 'teacher',
+                                className: row[3]
+                            });
+                            insertedCount++;
+                        }
+                    }
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+                showToast(`成功导入 ${insertedCount} 条教师数据`);
+            } else if (currentImportTab === 'schedule') {
+                const dayMap = { '周一': 1, '周二': 2, '周三': 3, '周四': 4, '周五': 5, '周六': 6, '周日': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '0': 0 };
+                
+                importPreviewData.forEach((row, index) => {
+                    if (row.length >= 4 && dayMap[row[1]] !== undefined) {
+                        schedule.push({
+                            id: Date.now() + index,
+                            courseName: row[0],
+                            dayOfWeek: dayMap[row[1]],
+                            startTime: row[2],
+                            endTime: row[3]
+                        });
+                        insertedCount++;
+                    }
+                });
+                localStorage.setItem('schedule', JSON.stringify(schedule));
+                showToast(`成功导入 ${insertedCount} 条课程数据`);
+            }
+            
+            document.getElementById('import-preview').style.display = 'none';
+            document.getElementById('import-textarea').value = '';
+            document.getElementById('import-file').value = '';
+            document.getElementById('import-validation').innerHTML = '';
+            importPreviewData = [];
+            
+            updateAdminStats();
+            loadManageList();
+        }
+
+        function loadManageList() {
+            const searchText = document.getElementById('manage-search').value.toLowerCase();
+            const container = document.getElementById('manage-list');
+            container.innerHTML = '';
+            
+            if (currentManageTab === 'students') {
+                const students = JSON.parse(localStorage.getItem('users') || '[]').filter(u => u.role === 'student');
+                const filtered = students.filter(s => 
+                    s.name.toLowerCase().includes(searchText) || 
+                    s.username.toLowerCase().includes(searchText) ||
+                    s.className.toLowerCase().includes(searchText)
+                );
+                
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">暂无学生数据</div>';
+                    return;
+                }
+                
+                filtered.forEach(student => {
+                    const item = document.createElement('div');
+                    item.className = 'student-item';
+                    item.innerHTML = `
+                        <div class="student-info">
+                            <div class="name">${student.name}</div>
+                            <div class="class">账号: ${student.username} | ${student.className}</div>
+                        </div>
+                        <button class="btn btn-grey" onclick="deleteUser(${student.id})">删除</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } else if (currentManageTab === 'teachers') {
+                const teachers = JSON.parse(localStorage.getItem('users') || '[]').filter(u => u.role === 'teacher');
+                const filtered = teachers.filter(t => 
+                    t.name.toLowerCase().includes(searchText) || 
+                    t.username.toLowerCase().includes(searchText) ||
+                    t.className.toLowerCase().includes(searchText)
+                );
+                
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">暂无教师数据</div>';
+                    return;
+                }
+                
+                filtered.forEach(teacher => {
+                    const item = document.createElement('div');
+                    item.className = 'student-item';
+                    item.innerHTML = `
+                        <div class="student-info">
+                            <div class="name">${teacher.name}</div>
+                            <div class="class">账号: ${teacher.username} | ${teacher.className}</div>
+                        </div>
+                        <button class="btn btn-grey" onclick="deleteUser(${teacher.id})">删除</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } else if (currentManageTab === 'schedule') {
+                const courses = JSON.parse(localStorage.getItem('schedule') || '[]');
+                const filtered = courses.filter(c => 
+                    c.courseName.toLowerCase().includes(searchText)
+                );
+                
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:#999;padding:40px;">暂无课程数据</div>';
+                    return;
+                }
+                
+                filtered.forEach(course => {
+                    const item = document.createElement('div');
+                    item.className = 'student-item';
+                    item.innerHTML = `
+                        <div class="student-info">
+                            <div class="name">${course.courseName}</div>
+                            <div class="class">${WEEK_DAYS[course.dayOfWeek]} ${course.startTime}-${course.endTime}</div>
+                        </div>
+                        <button class="btn btn-grey" onclick="deleteCourse(${course.id})">删除</button>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function searchManageData() {
+            loadManageList();
+        }
+
+        function deleteUser(id) {
+            showModal('确认删除', '确定要删除该用户吗？', () => {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const updated = users.filter(u => u.id !== id);
+                localStorage.setItem('users', JSON.stringify(updated));
+                showToast('用户已删除');
+                loadManageList();
+            });
+        }
+
+        function updateAdminStats() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+            const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+            
+            document.getElementById('stat-students').textContent = users.filter(u => u.role === 'student').length;
+            document.getElementById('stat-teachers').textContent = users.filter(u => u.role === 'teacher').length;
+            document.getElementById('stat-courses').textContent = schedule.length;
+            document.getElementById('stat-attendance').textContent = attendance.length;
+        }
+
+        function exportData(type) {
+            let data = [];
+            let headers = [];
+            let filename = '';
+            
+            if (type === 'students') {
+                const students = JSON.parse(localStorage.getItem('users') || '[]').filter(u => u.role === 'student');
+                headers = ['姓名', '账号', '密码', '班级'];
+                data = students.map(s => [s.name, s.username, s.password, s.className]);
+                filename = 'students.csv';
+            } else if (type === 'teachers') {
+                const teachers = JSON.parse(localStorage.getItem('users') || '[]').filter(u => u.role === 'teacher');
+                headers = ['姓名', '账号', '密码', '院系'];
+                data = teachers.map(t => [t.name, t.username, t.password, t.className]);
+                filename = 'teachers.csv';
+            } else if (type === 'schedule') {
+                const schedule = JSON.parse(localStorage.getItem('schedule') || '[]');
+                headers = ['课程名称', '星期', '开始时间', '结束时间'];
+                data = schedule.map(c => [c.courseName, WEEK_DAYS[c.dayOfWeek], c.startTime, c.endTime]);
+                filename = 'schedule.csv';
+            } else if (type === 'attendance') {
+                const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                headers = ['学生姓名', '日期', '时间', '状态', '课程名称'];
+                data = attendance.map(a => {
+                    const student = users.find(u => u.id === a.studentId);
+                    return [student ? student.name : '', a.date, a.time, a.status, a.courseName];
+                });
+                filename = 'attendance.csv';
+            }
+            
+            let csv = headers.join(',') + '\n';
+            data.forEach(row => {
+                csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            
+            showToast('导出成功');
+        }
+
+        function restoreDefaultSchedule() {
+            showModal('确认恢复', '确定要恢复默认课程表吗？当前课程表将被覆盖。', () => {
+                localStorage.setItem('schedule', JSON.stringify(DEFAULT_SCHEDULE));
+                showToast('已恢复默认课程表');
+                updateAdminStats();
+            });
+        }
+
+        function resetAllData() {
+            showModal('⚠️ 危险操作', '确定要重置所有数据吗？此操作不可恢复！', () => {
+                localStorage.clear();
+                initData();
+                showToast('数据已重置');
+                updateAdminStats();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initData();
+            
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                if (currentUser.role === 'student') {
+                    showView('student-view');
+                    initStudentView();
+                } else if (currentUser.role === 'teacher') {
+                    showView('teacher-view');
+                    initTeacherView();
+                } else {
+                    showView('admin-view');
+                    initAdminView();
+                }
+            }
+            
+            setInterval(checkCheckinTime, 60000);
+        });
+    </script>
+</body>
+</html>
